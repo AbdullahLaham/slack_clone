@@ -13,7 +13,7 @@ const UserButton = () => {
 
     if (isLoading) return <Loader className='size-4 animate-spin text-muted-foreground' />
     if (!data) return null;
-
+  console.log(data, 'rrrrrrr')
     const {name, email, image} = data;
 
     const avatarFallback = name!.charAt(0).toUpperCase()
@@ -23,8 +23,8 @@ const UserButton = () => {
       <DropdownMenu modal={false} >
         <DropdownMenuTrigger className='outline-none relative'>
             <Avatar className='size-10 hover:opacity-75 transition' >
-                <AvatarImage src={image} alt={name} />
-                <AvatarFallback className='bg-rose-300 text-white font-semibold'>{avatarFallback}</AvatarFallback>
+                <AvatarImage src={data.image} alt={name} />
+                <AvatarFallback className='bg-emerald-300 text-white font-semibold'><p className='text-slate-800'>{avatarFallback}</p></AvatarFallback>
             </Avatar>
 
         </DropdownMenuTrigger>

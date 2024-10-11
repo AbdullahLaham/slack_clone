@@ -1,5 +1,6 @@
 import React from 'react'
 import Toolbar from './Toolbar';
+import Sidebar from './Sidebar';
 
 const WorkspaceLayout = ({
     children,
@@ -7,9 +8,13 @@ const WorkspaceLayout = ({
     children: React.ReactNode;
   }) => {
   return (
-    <div className='h-full'>
+    <div className='h-full mt-0'>
         <Toolbar />
-      {children}
+        <div className='flex h-[92.5vh]'>
+          <Sidebar />
+          {children}
+        </div>
+      
     </div>
   )
 }

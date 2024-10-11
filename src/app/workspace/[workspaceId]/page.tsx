@@ -13,7 +13,7 @@ const page = () => {
 
   return (
     <div>
-      d {JSON.stringify(data)}
+      id {data?._id}
     </div>
   )
 }

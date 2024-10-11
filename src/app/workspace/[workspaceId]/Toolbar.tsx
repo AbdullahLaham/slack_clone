@@ -1,3 +1,6 @@
+"use client"
+
+
 import { Button } from '@/components/ui/button'
 import { useGetWorkspace } from '@/features/workspaces/api/useGetWorkspace'
 import { Info, Search } from 'lucide-react'
