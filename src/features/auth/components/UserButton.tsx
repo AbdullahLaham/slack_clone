@@ -16,7 +16,7 @@ const UserButton = () => {
   console.log(data, 'rrrrrrr')
     const {name, email, image} = data;
 
-    const avatarFallback = name!.charAt(0).toUpperCase()
+    const avatarFallback = name!.charAt(0).toUpperCase();
 
   return (
     <div>
