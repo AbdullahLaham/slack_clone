@@ -5,7 +5,7 @@ import { useGetWorkspace } from '@/features/workspaces/api/useGetWorkspace';
 import { useParams } from 'next/navigation'
 import React from 'react'
 import { Id } from '../../../../convex/_generated/dataModel';
-import { AlertTriangle, Loader } from 'lucide-react';
+import { AlertTriangle, Loader, MessageSquareText } from 'lucide-react';
 import WorkspaceHeader from './WorkspaceHeader';
 interface WorkspaceSidebarProps {
 
@@ -32,6 +32,10 @@ const WorkspaceSidebar = () => {
     return (
     <div className='flex flex-col bg-[#5e2c5f] h-full '>
       <WorkspaceHeader workspace={workspace} isAdmin={member.role == 'admin'} />
+      <div className='flex flex-col px-2 mt-3' >
+        <SidebarItem label='Threads' icon={MessageSquareText} id='threads' />
+
+      </div>
     </div>
   )
 }
