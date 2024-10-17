@@ -24,7 +24,7 @@ const useConfirm = (title: string, message: string): [() => React.JSX.Element, (
         promise?.resolve(true);
         handleClose();
     }
-    const confirmDialog = () => (
+    const ConfirmDialog = () => (
         <Dialog open={promise !== null} >
             
             <DialogContent>
@@ -43,7 +43,7 @@ const useConfirm = (title: string, message: string): [() => React.JSX.Element, (
         </Dialog>
     )
 
-    return [confirmDialog, confirm]
+    return [ConfirmDialog, confirm]
 }
 
 export default useConfirm

@@ -20,7 +20,7 @@ interface PreferencesModalProps {
 const PreferencesModal = ({open, setOpen, initialValue}: PreferencesModalProps) => {
     const router = useRouter();
 
-    const [confirmDialog, confirm] = useConfirm('are u sure?', 'This action is irreversible');
+    const [ConfirmDialog, confirm] = useConfirm('are u sure?', 'This action is irreversible');
     const [value, setValue] = useState(initialValue);
     const [editOpen, setEditOpen] = useState(false);
     const {workspaceId} = useParams();
@@ -69,7 +69,7 @@ const PreferencesModal = ({open, setOpen, initialValue}: PreferencesModalProps) 
 
   return (
     <>
-    <confirmDialog />
+    <ConfirmDialog />
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className='p-0 bg-gray-50 overflow-hidden'>
         <DialogHeader className='p-4 border-b bg-white'>
