@@ -8,14 +8,15 @@ type responseType = Id<"workspaces"> | null
 
 interface Options {
     onSuccess: (data: responseType) => void,
-    onError: (error: Error) => void,
-    onSettled: () => void,
+    onError?: (error: Error) => void,
+    onSettled?: () => void,
 }
 interface request {
     workspaceId: Id<"workspaces">,
+    joinCode: string;
 }
 
-export const useNewJoinCode = () => {
+export const useJoin = ({workspaceId, joinCode}: request) => {
 
     const [status, setStatus] = useState<null | 'success' | 'error' | 'settled' | 'pending'>(null);
     const isPending = useMemo(() => status == 'pending', [status])
@@ -23,18 +24,19 @@ export const useNewJoinCode = () => {
     const isError = useMemo(() => status == 'error', [status])
     const isSettled = useMemo(() => status == 'settled', [status])
 
-    const mutation = useMutation(api.workspaces.newJoinCode);
-    const mutate = useCallback(async ({workspaceId}: request, options?: Options) => {
+    const mutation = useMutation(api.workspaces.join);
+
+    const mutate = useCallback(async ({workspaceId, joinCode}: request, options?: Options) => {
             try {
                 setStatus('pending')
-                const response = await mutation({workspaceId});
+                const response = await mutation({workspaceId, joinCode});
                 options?.onSuccess(response);
                 return response;
 
 
             } catch (error) {
                 setStatus('error')
-                options?.onError(error as Error);
+                // options?.onError(error as Error);
                 throw error;
             }finally {
                 setStatus('settled')

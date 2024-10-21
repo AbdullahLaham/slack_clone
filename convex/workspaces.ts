@@ -63,12 +63,30 @@ export const get = query({
     }
 });
 
+export const getInfoById = query({
+    args: {id: v.id('workspaces')},
+    handler: async (ctx, args) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) {
+            return null
+        }
+        const member = await ctx.db.query('members')
+        .withIndex("by_workspace_id_user_id", (q) => q.eq("workspaceId", args.id).eq("userId", userId),)
+        .unique()
+
+        let workspace = await ctx.db.get(args.id);
+        return {
+            name: workspace?.name,
+            isMember: !!member
+        }
+    }
+});
 export const getById = query({
     args: {id: v.id('workspaces')},
     handler: async (ctx, args) => {
         const userId = await auth.getUserId(ctx);
         if (!userId) {
-            throw new Error("unauthorized")
+            return null
         }
         const member = await ctx.db.query('members')
         .withIndex("by_workspace_id_user_id", (q) => q.eq("workspaceId", args.id).eq("userId", userId),)
@@ -148,6 +166,41 @@ export const newJoinCode = mutation({
         await ctx.db.patch(args.workspaceId, {
             joinCode
         })
+        return args.workspaceId
+
+        
+    }
+})
+export const join = mutation({
+    args: {
+        joinCode: v.string(),
+        workspaceId: v.id("workspaces"),
+    }, handler: async (ctx, args) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) {
+            throw new Error("unauthorized")
+        }
+        const workspace = await ctx.db.get(args.workspaceId);
+        if (!workspace) {
+            throw new Error("workspace not found")
+        }
+        const member = await ctx.db.query('members')
+        .withIndex("by_workspace_id_user_id", (q) => q.eq("workspaceId", args.workspaceId).eq("userId", userId),)
+        .unique();
+
+        if (member) {
+            throw new Error("Already a member of this workspace")
+        }
+        if (workspace.joinCode !== args.joinCode) {
+            throw new Error("invalid join code")
+        }
+        await ctx.db.insert("members", {
+            userId,
+            workspaceId: workspace._id,
+            role: 'member',
+
+        })
+        
         return args.workspaceId
 
         

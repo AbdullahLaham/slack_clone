@@ -8,11 +8,12 @@ import { useCreateChannelModal } from '../api/store/useCreateChannelModal'
 import { useParams } from 'next/navigation'
 import { Id } from '../../../../convex/_generated/dataModel'
 import { toast } from 'sonner'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 
 const CreateChannelModal = () => {
-    const router = useRouter();
+    
     const {workspaceId} = useParams();
+    const router = useRouter();
     const [open, setOpen] = useCreateChannelModal();
     const [name, setName] = useState("");
     const {mutate, isPending} = useCreateChannel();
@@ -23,14 +24,14 @@ const CreateChannelModal = () => {
             name,
             workspaceId: workspaceId as Id<"workspaces">,
         }, {
-            onSuccess: (data) => {
+            onSuccess: (id) => {
                 toast.success('Channel created')
-                // router.push(`/workspace/${data}`)
+                router.push(`/workspace/${workspaceId}/channel/${id}`)
                 setOpen(false); setName("")
 
             },
             onError: (error) => {
-                
+              toast.success('Failed to create channel')
             },
             onSettled: () => {
                 

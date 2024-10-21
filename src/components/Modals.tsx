@@ -1,4 +1,5 @@
 "use client"
+import InviteModal from '@/app/workspace/[workspaceId]/InviteModal';
 import CreateChannelModal from '@/features/channels/components/CreateChannelModal';
 import CreateWorkspaceModal from '@/features/workspaces/components/createWorkspaceModal';
 import React, { useEffect, useState } from 'react'

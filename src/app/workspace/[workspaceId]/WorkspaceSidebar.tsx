@@ -19,6 +19,7 @@ interface WorkspaceSidebarProps {
 const WorkspaceSidebar = () => {
     const [_open, setOpen] = useCreateChannelModal();
     const {workspaceId} = useParams();
+    const {channelId} = useParams();
     const {data: member, isLoading: memberLoading} = useCurrentMemeber({workspaceId: workspaceId as Id<'workspaces'>});
     const {data: workspace, isLoading: workspaceLoading} = useGetWorkspace({id: workspaceId as Id<'workspaces'>})
     const {data: channels, isLoading: channelsLoading} = useGetChannels({workspaceId: workspaceId as Id<"workspaces">})
@@ -52,7 +53,7 @@ const WorkspaceSidebar = () => {
           {
             channels?.map((channel) => {
               return (
-                <SidebarItem key={channel._id} label={channel.name} icon={HashIcon} id={channel._id} />
+                <SidebarItem key={channel._id} label={channel.name} icon={HashIcon} id={channel._id} variant={channelId == channel?._id ? "active" : 'default'} />
               )
             })
           }
