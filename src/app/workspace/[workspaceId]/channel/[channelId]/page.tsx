@@ -7,6 +7,7 @@ import { Id } from '../../../../../../convex/_generated/dataModel';
 import { Loader, TriangleAlert } from 'lucide-react';
 import Header from './Header';
 import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog'
+import ChatInput from './ChatInput';
 
 const ChannelIdPage = () => {
   const {channelId} = useParams();
@@ -29,6 +30,8 @@ const ChannelIdPage = () => {
   return (
     <div className='flex flex-col h-full'>
       <Header title={channel?.name} />
+      <div className='flex-1' />
+      <ChatInput />
       
     </div>
   )
