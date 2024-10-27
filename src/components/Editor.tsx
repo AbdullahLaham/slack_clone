@@ -3,13 +3,14 @@ import Quill, { QuillOptions } from 'quill'
 import 'quill/dist/quill.snow.css';
 import { PiTextAa } from 'react-icons/pi'
 import { Button } from './ui/button';
-import { ImageIcon, Send, Smile } from 'lucide-react';
+import { ImageIcon, Send, Smile, XIcon } from 'lucide-react';
 import { MdSend } from 'react-icons/md'
 import Hint from './Hint';
 import { Delta, Op } from 'quill/core';
 import { cn } from '@/lib/utils';
 import { list } from 'postcss';
 import EmojiPopover from './EmojiPopover';
+import Image from 'next/image';
 type EditorValue = {
   image: File | null;
   body: string
@@ -27,6 +28,7 @@ interface EditorProps {
 const Editor = ({onSubmit, onCancel, placeholder='Write something...', defaultValue = [], disabled = false, innerRef, variant = 'create'}: EditorProps) => {
   const [text, setText] = useState("");
   const [toolbarVisible, setToolbarVisible] = useState(true);
+  const [image, setImage] = useState<File | null>(null)
 
   
   
@@ -36,6 +38,7 @@ const Editor = ({onSubmit, onCancel, placeholder='Write something...', defaultVa
   const quillRef = useRef<Quill | null>(null);
   const defaultValueRef = useRef(defaultValue);
   const disabledRef = useRef(disabled);
+  const imageElementRef = useRef<HTMLInputElement>(null);
 
   useLayoutEffect(() => {
     submitRef.current = onSubmit;
@@ -63,6 +66,15 @@ const Editor = ({onSubmit, onCancel, placeholder='Write something...', defaultVa
             enter: {
               key: "Enter",
               handler :() => {
+                const text = quill.getText();
+                // in useEffect we not use image but we use imageElementRef to not add it to the dependency array
+                const addedImage = imageElementRef.current?.files?.[0] || null;
+                const isEmpty =  text.replace(/<(.|\n)*?>/g, "").trim().length == 0 && !addedImage;
+                if (isEmpty) return;
+                onSubmit({body: JSON.stringify(quillRef.current?.getContents()), image: addedImage});
+
+
+
 
               }
             }, shiftEnter: {
@@ -108,12 +120,34 @@ const Editor = ({onSubmit, onCancel, placeholder='Write something...', defaultVa
       toolbarElement.classList.toggle("hidden")
     }
   }
-  const isEmpty = text.replace(/<(.|\n)*?>/g, "").trim().length == 0; // this regex is to remove the empty html elements and tags
+
+  const onEmojiSelect = (emoji: any) => {
+    const quill = quillRef.current;
+    quill?.insertText(quill?.getSelection()?.index || 0, emoji.native)
+
+  }
+  const isEmpty = !image && text.replace(/<(.|\n)*?>/g, "").trim().length == 0; // this regex is to remove the empty html elements and tags
   
   return (
     <div className='flex flex-col'>
-      <div className='flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white'>
+      <input type='file' accept='image/*' ref={imageElementRef} onChange={(e) => setImage(e.target.files![0])} className='hidden' />
+      <div className={cn('flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white', disabled && "opacity-50")}>
         <div ref={containerRef} className='h-full ql-custom' />
+        {!!image && (
+          <div className='p-2'>
+            <div className='relative size-[62px] flex items-center justify-center group/image'>
+            <Hint label='Remove Image'>
+              <button onClick={() => {setImage(null); imageElementRef.current!.value = ''}} className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black text-white absolute -top-2.5 -right-2.5 size-6 z-[4] border-2 border-white items-center justify-center'>
+                <XIcon className='size-3.5' />
+              </button>
+            </Hint>
+            <Image src={URL.createObjectURL(image)} alt='Uploaded' fill className='rounded-xl overflow-hidden border object-cover' />
+
+            </div>
+
+          </div>
+
+        )}
         <div className='flex px-2 pb-2 z-[5]'>
           <Hint label={toolbarVisible ? 'Hide Formatting': 'show formatting'}>
             <Button disabled={disabled} size={'iconSm'} variant={'ghost'} onClick={toggleToolbar} >
@@ -121,27 +155,27 @@ const Editor = ({onSubmit, onCancel, placeholder='Write something...', defaultVa
             </Button>
 
           </Hint>
-          <EmojiPopover onEmojiSelect={() => {}} hint='Emoji'>
-            <Button disabled={disabled} size={'iconSm'} variant={'ghost'} onClick={() => { }}>
+          <EmojiPopover onEmojiSelect={onEmojiSelect} hint='Emoji'>
+            <Button disabled={disabled} size={'iconSm'} variant={'ghost'} >
               <Smile className='size-4' />
             </Button>
           </EmojiPopover>
           {variant == 'create' && <Hint label='Image'>
-            <Button disabled={disabled} size={'iconSm'} variant={'ghost'} onClick={() => { }}>
+            <Button disabled={disabled} size={'iconSm'} variant={'ghost'} onClick={() => imageElementRef.current?.click()}>
               <ImageIcon className='size-4' />
             </Button>
           </Hint>}
           {variant == 'update' && <div className='ml-auto flex items-center gap-x-2'>
-            <Button variant={'outline'} size={'sm'} onClick={() => {}} disabled={disabled}>
+            <Button variant={'outline'} size={'sm'} onClick={onCancel} disabled={disabled}>
               Cancel
             </Button>
-            <Button className='ml-auto bg-[#007a5a]/70 text-gray-200 hover:bg-[#007a5a]/80 ' size={'sm'} onClick={() => {}} disabled={disabled || isEmpty}>
+            <Button className='ml-auto bg-[#007a5a]/70 text-gray-200 hover:bg-[#007a5a]/80 ' size={'sm'} onClick={() => onSubmit({body: JSON.stringify(quillRef.current?.getContents()), image})} disabled={disabled || isEmpty}>
               Save
             </Button>
 
             </div>}
           {variant == 'create' && <Hint label='Send'>
-            <Button disabled={isEmpty || disabled} className={cn('ml-auto', isEmpty ? ' bg-white hover:bg-white text-gray-200 text-muted-foreground' : ' bg-[#007a5a]/70 text-gray-200 hover:bg-[#007a5a]/80 ', )} size={'iconSm'} variant={'outline'} onClick={() => { }}>
+            <Button disabled={isEmpty || disabled} className={cn('ml-auto', isEmpty ? ' bg-white hover:bg-white text-gray-200 text-muted-foreground' : ' bg-[#007a5a]/70 text-gray-200 hover:bg-[#007a5a]/80 ', )} size={'iconSm'} variant={'outline'} onClick={() => onSubmit({body: JSON.stringify(quillRef.current?.getContents()), image})}>
               <MdSend className='size-4' />
             </Button>
           </Hint>}
