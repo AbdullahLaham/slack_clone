@@ -17,14 +17,19 @@ const Renderer = ({value}: RendererProps) => {
         quill.setContents(contents);
         let isEmpty = quill.getText().replace(/<(.|\n)*?>/g, "").trim().length == 0;
         setIsEmpty(isEmpty);
+        container.innerHTML = quill.root.innerHTML;
+        return () => {
+          if (container) {
+            container.innerHTML = ''
+          }
+        }
 
 
-    }, [])
-  return (
-    <div>
-      
-    </div>
-  )
+    }, [value]);
+    if (isEmpty) return null;
+    return (
+      <div ref={rendererRef} className='ql-editor ql-renderer ' />
+    )
 }
 
 export default Renderer
