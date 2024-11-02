@@ -1,0 +1,272 @@
+-- Create Suppliers Table
+CREATE TABLE Suppliers (
+    SupplierID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    ContactInfo VARCHAR(150),
+    Rating DECIMAL(2, 1) CHECK (Rating BETWEEN 1 AND 5)
+);
+
+-- Create Products Table
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Price DECIMAL(10, 2) CHECK (Price > 0),
+    SupplierID INT,
+    StockQuantity INT CHECK (StockQuantity >= 0),
+    FOREIGN KEY (SupplierID) REFERENCES Suppliers(SupplierID) ON DELETE SET NULL
+);
+
+-- Create Customers Table
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Address VARCHAR(150),
+    Email VARCHAR(100) UNIQUE,
+    CreditScore INT CHECK (CreditScore BETWEEN 300 AND 850)
+);
+
+-- Create Orders Table
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT,
+    OrderDate DATE NOT NULL,
+    ShippingStatus VARCHAR(50),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID) ON DELETE CASCADE
+);
+
+-- Create Order_Details Table
+CREATE TABLE Order_Details (
+    OrderDetailID INT PRIMARY KEY,
+    OrderID INT,
+    ProductID INT,
+    Quantity INT CHECK (Quantity > 0),
+    UnitPrice DECIMAL(10, 2) CHECK (UnitPrice > 0),
+    Discount DECIMAL(5, 2) CHECK (Discount >= 0 AND Discount <= 1),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE,
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID) ON DELETE SET NULL
+);
+
+-- Create Payments Table
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY,
+    CustomerID INT,
+    OrderID INT,
+    PaymentDate DATE NOT NULL,
+    PaymentAmount DECIMAL(10, 2) CHECK (PaymentAmount > 0),
+    PaymentMethod VARCHAR(50),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID) ON DELETE CASCADE,
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE SET NULL
+);
+
+-- Create Trigger to Update Stock Quantity in Products Table
+CREATE TRIGGER UpdateStockAfterOrder
+AFTER INSERT ON Order_Details
+FOR EACH ROW
+BEGIN
+    UPDATE Products
+    SET StockQuantity = StockQuantity - NEW.Quantity
+    WHERE ProductID = NEW.ProductID;
+END;
+
+-- Create Indexes for Optimization
+CREATE INDEX idx_customer_id ON Customers(CustomerID);
+CREATE INDEX idx_product_id ON Products(ProductID);
+CREATE INDEX idx_order_id ON Orders(OrderID);
+CREATE INDEX idx_order_detail_order_id ON Order_Details(OrderID);
+CREATE INDEX idx_order_detail_product_id ON Order_Details(ProductID);
+
+
+
+-- Insert Sample Data into Suppliers
+INSERT INTO Suppliers (SupplierID, Name, ContactInfo, Rating) VALUES
+(1, 'Supplier A', 'supa@gmail.com', 4.5),
+(2, 'Supplier B', 'supb@hotmail.com', 4.0),
+(3, 'Supplier C', 'subc@edu.com', 3.8);
+
+-- Insert Sample Data into Products
+INSERT INTO Products (ProductID, Name, Price, SupplierID, StockQuantity) VALUES
+(1, 'Product 1', 10.00, 1, 100),
+(2, 'Product 2', 15.55, 1, 50),
+(3, 'Product 3', 8.25, 2, 200),
+(4, 'Product 4', 12.00, 3, 0),  -- This product is out of stock
+(5, 'Product 5', 5.00, 3, 75);
+
+-- Insert Sample Data into Customers
+INSERT INTO Customers (CustomerID, Name, Address, Email, CreditScore) VALUES
+(1, 'Customer A', '123 Main St', 'custA@example.com', 700),
+(2, 'Customer B', '456 Elm St', 'custB@example.com', 650),
+(3, 'Customer C', '789 Oak St', 'custC@example.com', 720);
+
+-- Insert Sample Data into Orders
+INSERT INTO Orders (OrderID, CustomerID, OrderDate, ShippingStatus) VALUES
+(1, 1, '2024-01-10', 'Shipped'),
+(2, 2, '2024-02-15', 'Processing'),
+(3, 3, '2024-03-20', 'Delivered');
+
+-- Insert Sample Data into Order_Details
+INSERT INTO Order_Details (OrderDetailID, OrderID, ProductID, Quantity, UnitPrice, Discount) VALUES
+(1, 1, 1, 2, 10.00, 0.05),  -- Customer A buys 2 of Product 1 with a discount
+(2, 1, 3, 1, 8.25, 0.10),   -- Customer A buys 1 of Product 3 with a discount
+(3, 2, 2, 1, 15.50, 0.00),  -- Customer B buys 1 of Product 2
+(4, 3, 4, 3, 12.00, 0.20),  -- Customer C buys 3 of Product 4 with a discount
+(5, 3, 5, 1, 5.00, 0.00);    -- Customer C buys 1 of Product 5
+
+-- Insert Sample Data into Payments
+INSERT INTO Payments (PaymentID, CustomerID, OrderID, PaymentDate, PaymentAmount, PaymentMethod) VALUES
+(1, 1, 1, '2024-01-11', 19.00, 'Credit Card'),  -- Customer A's payment
+(2, 2, 2, '2024-02-16', 15.50, 'PayPal'),        -- Customer B's payment
+(3, 3, 3, '2024-03-21', 35.40, 'Credit Card');   -- Customer C's payment
+
+
+-- Step 2: Advanced SQL Queries
+
+-- Calculate the total revenue from each customer, accounting for discounts applied in Order_Details.
+
+SELECT 
+    c.CustomerID,
+    c.Name,
+    SUM(od.Quantity * od.UnitPrice * (1 - od.Discount)) AS TotalRevenue
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    Order_Details od ON o.OrderID = od.OrderID
+GROUP BY 
+    c.CustomerID, c.Name;
+
+-- Identify the top 3 suppliers based on the total value of products supplied and the average product rating.
+
+SELECT 
+    s.SupplierID,
+    s.Name,
+    SUM(p.Price * p.StockQuantity) AS TotalValue,
+    AVG(s.Rating) AS AverageRating
+FROM 
+    Suppliers s
+JOIN 
+    Products p ON s.SupplierID = p.SupplierID
+GROUP BY 
+    s.SupplierID, s.Name
+ORDER BY 
+    TotalValue DESC
+LIMIT 3;
+
+
+-- Find the best-selling products based on the total quantity sold, while excluding products with low customer ratings (<3).
+
+SELECT 
+    p.ProductID,
+    p.Name,
+    SUM(od.Quantity) AS TotalQuantitySold
+FROM 
+    Products p
+JOIN 
+    Order_Details od ON p.ProductID = od.ProductID
+JOIN 
+    Suppliers s ON p.SupplierID = s.SupplierID
+WHERE 
+    s.Rating >= 3
+GROUP BY 
+    p.ProductID, p.Name
+ORDER BY 
+    TotalQuantitySold DESC;
+
+-- List customers who have placed at least 3 orders but have an average payment delay of more than 7 days.
+
+SELECT 
+    c.CustomerID,
+    c.Name,
+    COUNT(o.OrderID) AS TotalOrders,
+    AVG(DATEDIFF(p.PaymentDate, o.OrderDate)) AS AveragePaymentDelay
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    Payments p ON o.OrderID = p.OrderID
+GROUP BY 
+    c.CustomerID, c.Name
+HAVING 
+    TotalOrders >= 3 AND AveragePaymentDelay > 7;
+
+
+-- Calculate the average discount applied across all orders made within the last 3 months.
+
+
+SELECT 
+    AVG(od.Discount) AS AverageDiscount
+FROM 
+    Order_Details od
+JOIN 
+    Orders o ON od.OrderID = o.OrderID
+WHERE 
+    o.OrderDate >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH);
+
+--Retrieve products supplied by at least 3 different suppliers, and display the average price per product.
+
+SELECT 
+    p.ProductID,
+    p.Name,
+    AVG(p.Price) AS AveragePrice
+FROM 
+    Products p
+JOIN 
+    Suppliers s ON p.SupplierID = s.SupplierID
+GROUP BY 
+    p.ProductID, p.Name
+HAVING 
+    COUNT(DISTINCT s.SupplierID) >= 3;
+
+
+
+
+
+--  database constraints and features,
+
+-- check Constraint for Product Price
+ALTER TABLE Products
+ADD CONSTRAINT chk_product_price CHECK (Price > 0);  -- ensures product price is greater than zero
+
+-- check Constraint for Customer Credit Score
+ALTER TABLE Customers
+ADD CONSTRAINT chk_credit_score CHECK (CreditScore BETWEEN 300 AND 850);  -- Validates credit score is between 300 and 850
+
+-- trigger to Update Stock Levels
+CREATE TRIGGER trg_update_stock
+AFTER INSERT ON Order_Details
+FOR EACH ROW
+BEGIN
+    -- Update the stock quantity in Products table when a new order detail is added
+    UPDATE Products
+    SET StockQuantity = StockQuantity - NEW.Quantity  -- Decrease stock by the quantity ordered
+    WHERE ProductID = NEW.ProductID;  -- Match the product ID from Order_Details
+END;
+
+-- INDEX on CustomerID in Orders Table
+CREATE INDEX idx_customer_id ON Orders(CustomerID);  -- Creates an index to speed up queries on CustomerID
+
+-- INDEX on ProductID in Order_Details Table
+CREATE INDEX idx_product_id ON Order_Details(ProductID);  -- Creates an index to speed up queries on ProductID
+
+-- Foreign Key Constraint for Orders Table
+ALTER TABLE Orders
+ADD CONSTRAINT fk_customer
+FOREIGN KEY (CustomerID)  -- Set CustomerID as a foreign key
+REFERENCES Customers(CustomerID)  -- Reference Customers table
+ON DELETE CASCADE;  -- Delete related orders when a customer is deleted
+
+-- Foreign Key Constraint for Payments Table
+ALTER TABLE Payments
+ADD CONSTRAINT fk_payment_customer
+FOREIGN KEY (CustomerID)  -- set CustomerID as a foreign key
+REFERENCES Customers(CustomerID)  -- Reference Customers table
+ON DELETE CASCADE;  -- Delete related payments when a customer is deleted
+
+-- Foreign Key Constraint for Order_Details Table
+ALTER TABLE 296Order_Details
+ADD CONSTRAINT fk_order
+FOREIGN KEY (OrderID) 
+REFERENCES Orders(OrderID)  
+ON DELETE CASCADE;  
+
