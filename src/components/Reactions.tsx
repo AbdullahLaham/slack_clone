@@ -6,6 +6,7 @@ import useCurrentMemeber from '@/features/members/api/useCurrentMemeber';
 import { cn } from '@/lib/utils';
 import Hint from './Hint';
 import EmojiPopover from './EmojiPopover';
+import { MdOutlineAddReaction } from 'react-icons/md';
 interface ReactionsProps {
     reactions?: Array<Omit<Doc<"reactions">, "memberId"> & {
         count: number;
@@ -34,8 +35,8 @@ const Reactions = ({ reactions, onChange }: ReactionsProps) => {
 
             ))}
             <EmojiPopover hint='Add reaction' onEmojiSelect={(emoji) => onChange(emoji)}>
-                <button className='h-7 px-3 rounded-full bg-slate-200/70'>
-
+                <button className='h-7 px-3 rounded-full bg-slate-200/70 border border-transparent hover:border-slate-500 text-slate-800 flex items-center gap-x-1 '>
+                    <MdOutlineAddReaction className='size-4' />
                 </button>
 
             </EmojiPopover>

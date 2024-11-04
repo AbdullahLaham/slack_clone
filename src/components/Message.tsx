@@ -13,12 +13,13 @@ import { useRemoveMessage } from '@/features/messages/api/useRemoveMessage';
 import useConfirm from '@/hooks/useConfirm';
 import { useToggleReaction } from '@/features/reactions/api/useToggleReactions';
 import Reactions from './Reactions';
+import { usePanel } from '@/hooks/usePanel';
 const Renderer = dynamic(() => import('@/components/Renderer'), { ssr: false });
 const Editor = dynamic(() => import('@/components/Editor'), { ssr: false });
 
 interface MessageProps {
-    id: Id<"messages">,
-    memberId: Id<"members">,
+    id?: Id<"messages">,
+    memberId?: Id<"members">,
     authorImage?: string;
     authorName?: string;
     isAuthor?: boolean;
@@ -26,12 +27,12 @@ interface MessageProps {
         count: number;
         memberIds: Id<"members">[]
     }>;
-    body: Doc<"messages">["body"];
+    body?: Doc<"messages">["body"];
     image?: string | null;
-    createdAt: Doc<"messages">["_creationTime"]
-    updatedAt: Doc<"messages">["updatedAt"]
-    isEditing: boolean;
-    setEditingId: (id: Id<'messages'> | null) => void;
+    createdAt?: Doc<"messages">["_creationTime"]
+    updatedAt?: Doc<"messages">["updatedAt"]
+    isEditing?: boolean;
+    setEditingId?: (id: Id<'messages'> | null) => void;
     isCompact?: boolean;
     hideThreadButton?: boolean;
     threadCount?: number;
@@ -39,6 +40,7 @@ interface MessageProps {
     threadTimestamp?: number
 }
 const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, reactions, body, image, createdAt, updatedAt, isEditing, setEditingId, isCompact, hideThreadButton, threadCount, threadImage, threadTimestamp }: MessageProps) => {
+    const {parentMessageId, onOpenMessage, onClose} = usePanel();
     const [ConfirmDialog, confirm] = useConfirm('Delete message', 'are you want to delete this message');
     const { mutate: updateMessage, isPending: updating } = useUpdateMessage();
     const { mutate: removeMessage, isPending: removing } = useRemoveMessage();
@@ -59,7 +61,10 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
         if (!ok) return;
         removeMessage({ id }, {
             onSuccess: () => {
-                toast.success("message deleted")
+                toast.success("message deleted");
+                if (parentMessageId == id) {
+                    onClose();
+                }
             }, onError: () => {
                 toast.success("failed to delete message")
             }
@@ -81,7 +86,6 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
     }
     const formatFullTime = (date: Date) => {
         return `${isToday(date) ? "Today" : isYesterday(date) ? "Yesterday" : format(date, "MMM d, yyyy")} at ${format(date, "h:mm:ss a")}`;
-
     }
     if (isCompact) {
         return (
@@ -112,7 +116,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                         )}
                     </>
                     {!isEditing && (
-                        <Toolbar isAuthor={isAuthor} isPending={isPending} handleEdit={() => setEditingId(id)} handleThread={() => { }} handleDelete={handleDelete} hideThreadButton={hideThreadButton} handleReaction={handleReaction} />
+                        <Toolbar isAuthor={isAuthor} isPending={isPending} handleEdit={() => setEditingId(id)} handleThread={() => onOpenMessage(id)} handleDelete={handleDelete} hideThreadButton={hideThreadButton} handleReaction={handleReaction} />
 
                     )}
 
@@ -165,8 +169,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                         )}
                     </div>
                     {!isEditing && (
-                        <Toolbar isAuthor={isAuthor} isPending={isPending} handleEdit={() => setEditingId(id)} handleThread={() => { }} handleDelete={handleDelete} hideThreadButton={hideThreadButton} handleReaction={handleReaction} />
-
+                        <Toolbar isAuthor={isAuthor} isPending={isPending} handleEdit={() => setEditingId(id)} handleThread={() => onOpenMessage(id)} handleDelete={handleDelete} hideThreadButton={hideThreadButton} handleReaction={handleReaction} />
                     )}
                 </div>
 
