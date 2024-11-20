@@ -1,6 +1,7 @@
-import {useQueryState} from 'nuqs';
+"use client"
 
-// const [parentMessageId, setParentMessageId] = useState(null);
+import {parseAsBoolean, useQueryState} from 'nuqs';
+
 
 export const useParentMessageId = () => {
     return useQueryState("parentMessageId");

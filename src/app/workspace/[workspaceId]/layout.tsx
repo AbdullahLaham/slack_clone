@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 import Toolbar from './Toolbar';
 import Sidebar from './Sidebar';
@@ -6,6 +7,7 @@ import WorkspaceSidebar from './WorkspaceSidebar';
 import { usePanel } from '@/hooks/usePanel';
 import { Loader } from 'lucide-react';
 import { Id } from '../../../../convex/_generated/dataModel';
+import Thread from '@/features/messages/api/components/Thread';
 const WorkspaceLayout = ({
   children,
 }: {

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import { Id } from '../../../../../convex/_generated/dataModel'
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Loader2, XIcon } from 'lucide-react';
+import { AlertTriangle, Loader2, LoaderPinwheel, XIcon } from 'lucide-react';
 import { useGetMessages } from '../useGetMessages';
 import { useGetMessage } from '../useGetMessage';
 import Message from '@/components/Message';
@@ -48,7 +48,7 @@ const Thread = ({ messageId, onClose }: ThreadProps) => {
 
   const {mutate: generateUploadUrl} = useGenerateUploadUrl();
   const canLoadMore = status == 'CanLoadMore';
-  const LoadingMore = status == 'LoadingMore';
+  const isLoadingMore = status == 'LoadingMore';
   const formatDateLabel = (datestr: string) => {
     const date = new Date();
     if (isToday(date)) return 'Today';
@@ -163,6 +163,7 @@ const Thread = ({ messageId, onClose }: ThreadProps) => {
       </div>
       <div className='flex flex-col-reverse flex-1 pb-4 overflow-y-auto messages-scrollbar '>
       {Object.entries(groupedMessages || {}).map(([dateKey, messages]) => (
+        
         <div key={dateKey} className=''>
           <div className='text-center my-2 relative'>
             <hr className='absolute top-1/2 left-0 right-0 border-t border-gray-300' />
@@ -174,14 +175,34 @@ const Thread = ({ messageId, onClose }: ThreadProps) => {
           {messages.map((message, index) => {
             const prevMessage = messages[index - 1];
             const isCompact = prevMessage && prevMessage.user._id == message.user._id && differenceInMinutes(new Date(message._creationTime), new Date(prevMessage._creationTime)) < TIME_THRESHOLD;
-            return (<Message key={message._id} id={message._id} memberId={message.memberId} authorImage={message.user.image} authorName={message.user.name} isAuthor={message.memberId == currentMember?._id} reactions={message.reactions} body={message.body} image={message.image} updatedAt={message.updatedAt} createdAt={message._creationTime} isEditing={editingId == message?._id} setEditingId={setEditingId} isCompact={isCompact} hideThreadButton={variant == 'thread'} threadCount={message.threadCound} threadImage={message.threadImage} threadTimestamp={message.threadTimestamp} />)
+            return (<Message key={message._id} id={message._id} memberId={message.memberId} authorImage={message.user.image} authorName={message.user.name} isAuthor={message.memberId == currentMember?._id} reactions={message.reactions} body={message.body} image={message.image} updatedAt={message.updatedAt} createdAt={message._creationTime} isEditing={editingId == message?._id} setEditingId={setEditingId} isCompact={isCompact} hideThreadButton threadCount={message.threadCound} threadImage={message.threadImage} threadTimestamp={message.threadTimestamp} />)
           })}
 
         </div>
       ))}
+      <div className='h-1' ref={(el) => {
+        if (el) {
+          const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && canLoadMore) {
+              loadMore?.();
+            }
+          }, {threshold: 1.0});
+          observer.observe(el);
+          return () => observer.disconnect();
+        }
+      }} />
+      {isLoadingMore && (
+        <div className='text-center my-2 relative'>
+          <hr className='absolute top-1/2 left-0 right-0 border-t border-gray-300' />
+          <div className='relative inline-block bg-white px-4 py-1 rounded-full text-xs border shadow-sm border-gray-300'>
+            <LoaderPinwheel className='size-4 animate-spin' />
+          </div>
+        </div>
+      )}
         <Message hideThreadButton memberId={message?.memberId} authorImage={message?.user.image} isAuthor={currentMember?._id == message?.memberId}  body={message?.body} image={message?.image} createdAt={message?._creationTime} updatedAt={message?.updatedAt} id={message?._id} reactions={message?.reactions} isEditing={editingId == message?._id} setEditingId={setEditingId}  />
         <Editor key={editorKey} innerRef={editorRef} onSubmit={handleSubmit} disabled={pending} placeholder='Reply...'  />
       </div>
+      
 
       <div className='px-4'>
 

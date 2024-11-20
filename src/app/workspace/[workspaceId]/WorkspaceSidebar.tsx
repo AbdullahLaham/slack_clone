@@ -20,6 +20,7 @@ const WorkspaceSidebar = () => {
     const [_open, setOpen] = useCreateChannelModal();
     const {workspaceId} = useParams();
     const {channelId} = useParams();
+    const {memberId} = useParams();
     const {data: member, isLoading: memberLoading} = useCurrentMemeber({workspaceId: workspaceId as Id<'workspaces'>});
     const {data: workspace, isLoading: workspaceLoading} = useGetWorkspace({id: workspaceId as Id<'workspaces'>})
     const {data: channels, isLoading: channelsLoading} = useGetChannels({workspaceId: workspaceId as Id<"workspaces">})
@@ -61,7 +62,7 @@ const WorkspaceSidebar = () => {
         </WorkspaceSection>
         <WorkspaceSection label='Direct Messages' hint='new direct message' onNew={() => {}}>
           {members?.map((item) => (
-            <UserItem key={item._id} label={item.user.name} image={item.user.image} id={item._id} />
+            <UserItem key={item._id} label={item.user.name} image={item.user.image} id={item._id} variant={member._id == memberId ? 'active' : 'default'} />
           ))}  
         </WorkspaceSection>
         

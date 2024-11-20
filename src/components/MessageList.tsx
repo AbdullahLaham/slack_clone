@@ -1,5 +1,6 @@
 import { useGetMessagesReturnType } from '@/features/messages/api/useGetMessages';
 import { differenceInMinutes, format, isToday, isYesterday } from 'date-fns'
+import conversationHero from './ConversationHero'
 import React, { useState } from 'react'
 import Message from './Message';
 import ChannelHero from './ChannelHero';
@@ -7,6 +8,7 @@ import { Id } from '../../convex/_generated/dataModel';
 import { useParams } from 'next/navigation';
 import useCurrentMemeber from '@/features/members/api/useCurrentMemeber';
 import { LoaderPinwheel } from 'lucide-react';
+import ConversationHero from './ConversationHero';
 interface MessageListProps {
   memberName?: string;
   memberImage?: string;
@@ -81,8 +83,11 @@ const MessageList = ({ memberImage, memberName, variant, channelName, channelCre
       {variant == 'channel' && channelName && channelCreationTime && (
         <ChannelHero name={channelName} creationTime={channelCreationTime} />
       )}
+      {variant == 'conversation' && (
+        <ConversationHero name={memberName} image={memberImage} />
+      )}
     </div>
   )
 }
 
-export default MessageList
+export default MessageList;

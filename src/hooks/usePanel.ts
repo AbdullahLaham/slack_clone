@@ -1,3 +1,5 @@
+"use client"
+
 import { useParentMessageId } from "@/features/messages/api/store/useParentMessageId"
 
 export const usePanel = () => {
