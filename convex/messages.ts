@@ -17,7 +17,8 @@ const populateThread = async (ctx: QueryCtx, messageId: Id<"messages">) => {
     if (messages.length == 0) return {
         count: 0, // number of replies
         image: undefined, // the last user was replied
-        timestamp: 0 // the last reply timestamp
+        timestamp: 0, // the last reply timestamp
+        name: '',
     }
     const lastmessage = messages[messages.length - 1];
     let lastreplyer = await populateMember(ctx, lastmessage.memberId);
@@ -25,15 +26,18 @@ const populateThread = async (ctx: QueryCtx, messageId: Id<"messages">) => {
         return {
             count: messages.length, // number of replies
             image: undefined, // the last user was replied
-            timestamp: 0 // the last reply timestamp
+            timestamp: 0, // the last reply timestamp
+            name: '',
         }
     }
+
     let lastMessageuser = await populateUser(ctx, lastreplyer.userId);
 
     return {
         count: messages.length, // number of replies
         image: lastMessageuser?.image, // the last user was replied
-        timestamp: lastmessage._creationTime // the last reply timestamp
+        timestamp: lastmessage._creationTime, // the last reply timestamp
+        name: lastMessageuser?.name,
     }
 
 
@@ -280,6 +284,7 @@ export const get = query({
                             reactions: reactionWithoutMemberidProperty,
                             threadCound: thread.count,
                             threadImage: thread.image,
+                            threadName: thread.name,
                             threadTimestamp: thread.timestamp,
                             image
                         }

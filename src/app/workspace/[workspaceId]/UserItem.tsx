@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Avatar } from '@/components/ui/avatar'
-import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
+import { Avatar , AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 interface UserItemProps {
     id: Id<"members">,
     label?: string,

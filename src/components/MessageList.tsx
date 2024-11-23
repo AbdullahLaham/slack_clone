@@ -56,7 +56,7 @@ const MessageList = ({ memberImage, memberName, variant, channelName, channelCre
           {messages.map((message, index) => {
             const prevMessage = messages[index - 1];
             const isCompact = prevMessage && prevMessage.user._id == message.user._id && differenceInMinutes(new Date(message._creationTime), new Date(prevMessage._creationTime)) < TIME_THRESHOLD;
-            return (<Message key={message._id} id={message._id} memberId={message.memberId} authorImage={message.user.image} authorName={message.user.name} isAuthor={message.memberId == currentMember?._id} reactions={message.reactions} body={message.body} image={message.image} updatedAt={message.updatedAt} createdAt={message._creationTime} isEditing={editingId == message?._id} setEditingId={setEditingId} isCompact={isCompact} hideThreadButton={variant == 'thread'} threadCount={message.threadCound} threadImage={message.threadImage} threadTimestamp={message.threadTimestamp} />)
+            return (<Message key={message._id} id={message._id} memberId={message.memberId} authorImage={message.user.image} authorName={message.user.name} isAuthor={message.memberId == currentMember?._id} reactions={message.reactions} body={message.body} image={message.image} updatedAt={message.updatedAt} createdAt={message._creationTime} isEditing={editingId == message?._id} setEditingId={setEditingId} isCompact={isCompact} hideThreadButton={variant == 'thread'} threadCount={message.threadCound} threadImage={message.threadImage} threadName={message.threadName} threadTimestamp={message.threadTimestamp} />)
           })}
 
         </div>

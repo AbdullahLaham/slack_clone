@@ -14,11 +14,12 @@ import useConfirm from '@/hooks/useConfirm';
 import { useToggleReaction } from '@/features/reactions/api/useToggleReactions';
 import Reactions from './Reactions';
 import { usePanel } from '@/hooks/usePanel';
+import ThreadBar from './ThreadBar';
 const Renderer = dynamic(() => import('@/components/Renderer'), { ssr: false });
 const Editor = dynamic(() => import('@/components/Editor'), { ssr: false });
 
 interface MessageProps {
-    id?: Id<"messages">,
+    id: Id<"messages">,
     memberId?: Id<"members">,
     authorImage?: string;
     authorName?: string;
@@ -27,20 +28,21 @@ interface MessageProps {
         count: number;
         memberIds: Id<"members">[]
     }>;
-    body?: Doc<"messages">["body"];
+    body: Doc<"messages">["body"];
     image?: string | null;
-    createdAt?: Doc<"messages">["_creationTime"]
-    updatedAt?: Doc<"messages">["updatedAt"]
+    createdAt: Doc<"messages">["_creationTime"]
+    updatedAt: Doc<"messages">["updatedAt"]
     isEditing?: boolean;
-    setEditingId?: (id: Id<'messages'> | null) => void;
+    setEditingId: (id: Id<'messages'> | null) => void;
     isCompact?: boolean;
     hideThreadButton?: boolean;
     threadCount?: number;
     threadImage?: string;
+    threadName?: string;
     threadTimestamp?: number
 }
-const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, reactions, body, image, createdAt, updatedAt, isEditing, setEditingId, isCompact, hideThreadButton, threadCount, threadImage, threadTimestamp }: MessageProps) => {
-    const {parentMessageId, onOpenMessage, onClose} = usePanel();
+const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, reactions, body, image, createdAt, updatedAt, isEditing, setEditingId, isCompact, hideThreadButton, threadCount, threadImage, threadName = "Member", threadTimestamp }: MessageProps) => {
+    const {parentMessageId, onOpenMessage, profileId, onOpenProfile, onClose} = usePanel();
     const [ConfirmDialog, confirm] = useConfirm('Delete message', 'are you want to delete this message');
     const { mutate: updateMessage, isPending: updating } = useUpdateMessage();
     const { mutate: removeMessage, isPending: removing } = useRemoveMessage();
@@ -103,12 +105,13 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
 
                         </div>
                         {!isEditing ? <div className='flex flex-col w-full'>
-                            <Renderer value={body} />
+                            {body && <Renderer value={body} />}
                             <Thumbnail url={image} />
                             {updatedAt ? (
                                 <span className='text-xs text-muted-foreground'>(edited)</span>
                             ) : null}
                             <Reactions reactions={reactions} onChange={handleReaction} />
+                            <ThreadBar image={threadImage} count={threadCount} timestamp={threadTimestamp} name={threadName} onClick={() => onOpenMessage(id)}  />
                         </div> : (
                             <div className='w-full h-full'>
                                 <Editor onSubmit={handleUpdateMessage} disabled={isPending} defaultValue={JSON.parse(body)} onCancel={() => setEditingId(null)} variant={'update'} />
@@ -130,7 +133,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
             <ConfirmDialog />
             <div className={cn('flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 group relative', isEditing && "bg-[#f2c74433] hover:bg-[#f2c74433] ")}>
                 <div className='flex items-start gap-2'>
-                    <button>
+                    <button onClick={() => onOpenProfile(memberId)}>
                         <Avatar>
                             <AvatarImage src={authorImage} />
                             <AvatarFallback className='flex items-center justify-center '>{authorName?.charAt(0).toUpperCase()}</AvatarFallback>
@@ -139,7 +142,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                     <div className='flex flex-col w-full overflow-hidden'>
                         {!isEditing ? <>
                             <div className='text-sm text-muted'>
-                                <button onClick={() => { }} className='font-bold text-primary hover:underline'>
+                                <button onClick={() => onOpenProfile(memberId)} className='font-bold text-primary hover:underline'>
                                     {authorName}
 
                                 </button>
@@ -153,13 +156,14 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
 
                             </div>
                             <div className='flex flex-col w-full'>
-                                <Renderer value={body} />
+                                {body && <Renderer value={body} />}
                                 <Thumbnail url={image} />
                                 {updatedAt ? (
                                     <span className='text-xs text-muted-foreground'>(edited)</span>
 
                                 ) : null}
                                 <Reactions reactions={reactions} onChange={handleReaction} />
+                                <ThreadBar image={threadImage} count={threadCount} timestamp={threadTimestamp} name={threadName} onClick={() => onOpenMessage(id)} />
                             </div>
                         </> : (
                             <div className='w-full h-full'>

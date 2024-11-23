@@ -1,15 +1,15 @@
 import React, { useRef, useState } from 'react'
-import { Id } from '../../../../../convex/_generated/dataModel'
+import { Id } from '../../../../convex/_generated/dataModel'
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Loader2, LoaderPinwheel, XIcon } from 'lucide-react';
-import { useGetMessages } from '../useGetMessages';
-import { useGetMessage } from '../useGetMessage';
+import { useGetMessages } from '../api/useGetMessages';
+import { useGetMessage } from '../api/useGetMessage';
 import Message from '@/components/Message';
 import useCurrentMemeber from '@/features/members/api/useCurrentMemeber';
 import { useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Quill from 'quill';
-import { useCreateMessage } from '../useCreateMessage';
+import { useCreateMessage } from '../api/useCreateMessage';
 import { useGenerateUploadUrl } from '@/features/upload/api/useGenerateUpload';
 import { toast } from 'sonner';
 import { differenceInMinutes, format, isToday, isYesterday } from 'date-fns';
