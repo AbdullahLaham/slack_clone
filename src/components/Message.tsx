@@ -1,6 +1,7 @@
 import React from 'react'
 import { Doc, Id } from '../../convex/_generated/dataModel'
 import dynamic from 'next/dynamic';
+import {useSearchParams, useRouter} from 'next/navigation'
 import { format, isToday, isYesterday } from 'date-fns';
 import Hint from './Hint';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -36,18 +37,21 @@ interface MessageProps {
     setEditingId: (id: Id<'messages'> | null) => void;
     isCompact?: boolean;
     hideThreadButton?: boolean;
-    threadCount?: number;
+    threadCount: number;
     threadImage?: string;
     threadName?: string;
-    threadTimestamp?: number
+    threadTimestamp: number
 }
 const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, reactions, body, image, createdAt, updatedAt, isEditing, setEditingId, isCompact, hideThreadButton, threadCount, threadImage, threadName = "Member", threadTimestamp }: MessageProps) => {
-    const {parentMessageId, onOpenMessage, profileId, onOpenProfile, onClose} = usePanel();
+    const {parentMessageId, onOpenMessage, profileId, onOpenProfile} = usePanel();
     const [ConfirmDialog, confirm] = useConfirm('Delete message', 'are you want to delete this message');
     const { mutate: updateMessage, isPending: updating } = useUpdateMessage();
     const { mutate: removeMessage, isPending: removing } = useRemoveMessage();
     const {mutate: toggleReaction, isPending: togglingReaction} = useToggleReaction();
     const isPending = updating || removing || togglingReaction;
+    console.log(parentMessageId, 'parentMessageId');
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const handleReaction = (value: string) => {
         toggleReaction({
             value,
@@ -58,6 +62,23 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                 toast.error('failed to toggle reaction')
         }})
     }
+    const openMessage = (messageId: string) => {
+        console.log('parrrrrrrrrr', messageId);
+        const params = new URLSearchParams(searchParams.toString());
+            if (messageId) {
+                params.set('parentMessageId', messageId);
+            } else {
+                params.delete('parentMessageId');
+            }
+            router.push(`?${params.toString()}`);
+        //     setParentMessageId(messageId);
+        // setParentMessageId(messageId);
+        // setProfileId(null);
+    }
+    const onClose = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('parentMessageId');
+    };
     const handleDelete = async () => {
         const ok = await confirm();
         if (!ok) return;
@@ -162,6 +183,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                                     <span className='text-xs text-muted-foreground'>(edited)</span>
 
                                 ) : null}
+                                
                                 <Reactions reactions={reactions} onChange={handleReaction} />
                                 <ThreadBar image={threadImage} count={threadCount} timestamp={threadTimestamp} name={threadName} onClick={() => onOpenMessage(id)} />
                             </div>
@@ -173,7 +195,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                         )}
                     </div>
                     {!isEditing && (
-                        <Toolbar isAuthor={isAuthor} isPending={isPending} handleEdit={() => setEditingId(id)} handleThread={() => onOpenMessage(id)} handleDelete={handleDelete} hideThreadButton={hideThreadButton} handleReaction={handleReaction} />
+                        <Toolbar isAuthor={isAuthor} isPending={isPending} handleEdit={() => setEditingId(id)} handleThread={() => openMessage(id)} handleDelete={handleDelete} hideThreadButton={hideThreadButton} handleReaction={handleReaction} />
                     )}
                 </div>
 

@@ -15,8 +15,9 @@ const WorkspaceLayout = ({
   children: React.ReactNode;
 }) => {
   const { parentMessageId, profileId, onClose } = usePanel();
+  console.log('pppppppppppppppppptttttttttttttttt', parentMessageId)
   const showPanel = !!parentMessageId || !!profileId;
-
+  
   return (
     <div className='h-full mt-0'>
       <Toolbar />
@@ -36,6 +37,7 @@ const WorkspaceLayout = ({
               <ResizablePanel minSize={20} defaultSize={29} >
                 {parentMessageId ? (
                   <div>
+                    yyyyyyyyyyyyyyyyyyy
                     <Thread messageId={parentMessageId as Id<"messages">} onClose={onClose} />
                   </div>
 

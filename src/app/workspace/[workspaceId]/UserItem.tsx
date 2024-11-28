@@ -30,7 +30,7 @@ const UserItem = ({id, label, image, variant}: UserItemProps) => {
     const {workspaceId} = useParams();
   return (
     <Button variant={'transparent'} className={cn(userItemVariants({variant}))} size={'sm'} asChild >
-        <Link href={`/workspac/${workspaceId}/member/${id}`}>
+        <Link href={`/workspace/${workspaceId}/member/${id}`}>
             <Avatar className='rounded-md size-5 mr-1'>
                 <AvatarImage className='size-5 rounded-md' src={image}  />
                 <AvatarFallback className='size-5 rounded-md bg-sky-500  flex items-center justify-center text-white text-xs'>{label?.charAt(0).toUpperCase()}</AvatarFallback>

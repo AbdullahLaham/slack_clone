@@ -16,8 +16,9 @@ interface ReactionsProps {
 }
 const Reactions = ({ reactions, onChange }: ReactionsProps) => {
     const { workspaceId } = useParams();
+    console.log('rettt', reactions)
     const { data: currentMember } = useCurrentMemeber({ workspaceId: workspaceId as Id<"workspaces"> });
-    if (DataTransfer.length == 0 || !currentMember) {
+    if (!currentMember) {
         return null;
     }
     return (

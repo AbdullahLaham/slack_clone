@@ -22,7 +22,7 @@ const MemberIdPage = () => {
             }, onError(error) {
                 toast.error("failed to create or get conversation")
             }
-        })
+        }).then((id) => setConversationId(id));
 
     }, [memberId, workspaceId, mutate]);
     if (isPending) {

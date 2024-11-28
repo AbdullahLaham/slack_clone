@@ -31,11 +31,16 @@ export const toggle = mutation({
         .filter((q) => q.and(
             q.eq(q.field('messageId'), args.messageId),
             q.eq(q.field('memberId'), member._id),
-            q.eq(q.field('value'), args.value),
+            // q.eq(q.field('value'), args.value),
         )).first();
         if (existingReactionFromUser) {
             const id = await ctx.db.delete(existingReactionFromUser._id);
-            return id
+            await ctx.db.insert("reactions", {
+                memberId: member._id,
+                messageId: args.messageId,
+                value: args.value,
+                workspaceId: message.workspaceId,
+        });
         } else {
             const id = await ctx.db.insert("reactions", {
                 memberId: member._id,

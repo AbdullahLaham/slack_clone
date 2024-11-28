@@ -1,32 +1,34 @@
 "use client";
 
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Id } from '../../../../convex/_generated/dataModel';
 
 /**
- * Hook to manage the `parentMessageId` query parameter in the URL.
- * Synchronizes state with the query parameter and provides a setter.
+ * Hook to manage the `profileId` query parameter.
  */
-export const useProfileId = (): [Id<"members"> | null, (newValue: Id<"members"> | null) => void] => {
+export const useProfileId = () => {
+    const searchParams = useSearchParams();
     const router = useRouter();
     const [profileId, setProfileId] = useState<Id<"members"> | null>(null);
 
-    // Synchronize state with the query parameter when the router is ready
+    // Synchronize state with the URL query parameter
     useEffect(() => {
-        if (router.isReady) {
-            const id = router.query.parentMessageId as Id<"members"> | undefined;
-            setProfileId(id || null);
-        }
-    }, [router.query, router.isReady]);
+        const id = searchParams.get('profileId');
+        setProfileId( null);
+    }, [searchParams]);
 
-
-    // Update the query parameter and local state
+    // Update the query parameter in the URL
     const setQuery = (newValue: Id<"members"> | null) => {
-        const updatedQuery = { ...router.query, parentMessageId: newValue || undefined };
-        router.push({ pathname: router.pathname, query: updatedQuery }, undefined, { shallow: true });
+        const params = new URLSearchParams(searchParams.toString());
+        if (newValue) {
+            params.set('profileId', newValue);
+        } else {
+            params.delete('profileId');
+        }
+        router.push(`?${params.toString()}`);
         setProfileId(newValue);
     };
 
-    return [profileId, setQuery];
+    return [profileId, setQuery] as const;
 };

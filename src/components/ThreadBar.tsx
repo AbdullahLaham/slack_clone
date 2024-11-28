@@ -5,8 +5,8 @@ import { ChevronRight } from 'lucide-react';
 
 interface ThreadBarProps {
     image?: string;
-    count?: number;
-    timestamp?: number;
+    count: number;
+    timestamp: number;
     name?: string;
     onClick: () => void;
 }

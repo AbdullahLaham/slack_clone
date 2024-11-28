@@ -10,11 +10,10 @@ interface Options {
     onSuccess?: (data: responseType) => void,
     onError?: (error: Error) => void,
     onSettled?: () => void,
-    throwError: true,
+    throwError?: true,
 }
 interface request {
     id: Id<"members">,
-    
 }
 
 export const useRemoveMember = () => {

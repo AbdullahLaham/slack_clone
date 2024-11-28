@@ -2,18 +2,21 @@
 
 import { useProfileId } from "@/features/members/store/useProfileIMemberd";
 import { useParentMessageId } from "@/features/messages/store/useParentMessageId";
+import { Id } from "../../convex/_generated/dataModel";
 
 
 /**
  * Hook to manage panel state, built on top of `useParentMessageId`.
  * Provides methods to open and close the panel, and tracks the current message ID.
  */
+
 export const usePanel = () => {
     const [parentMessageId, setParentMessageId] = useParentMessageId();
     const [profileId, setProfileId] = useProfileId();
 
     // Open the panel with a specific message ID
-    const onOpenMessage = (messageId: any) => {
+    const onOpenMessage = (messageId: Id<"messages">) => {
+        console.log('parrrrrrrrrr', messageId)
         setParentMessageId(messageId);
         setProfileId(null);
     };

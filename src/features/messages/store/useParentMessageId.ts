@@ -1,31 +1,33 @@
 "use client";
 
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 /**
- * Hook to manage the `parentMessageId` query parameter in the URL.
- * Synchronizes state with the query parameter and provides a setter.
+ * Hook to manage the `parentMessageId` query parameter.
  */
-export const useParentMessageId = (): [string | null, (newValue: string | null) => void] => {
+export const useParentMessageId = () => {
+    const searchParams = useSearchParams();
     const router = useRouter();
     const [parentMessageId, setParentMessageId] = useState<string | null>(null);
 
-
-    // Synchronize state with the query parameter when the router is ready
+    // Synchronize state with the URL query parameter
     useEffect(() => {
-        if (router.isReady) {
-            const id = router.query.parentMessageId as string | undefined;
-            setParentMessageId(id || null);
-        }
-    }, [router.query, router.isReady]);
+        const id = searchParams.get('parentMessageId');
+        setParentMessageId(id || null);
+    }, [searchParams]);
 
-    // Update the query parameter and local state
+    // Update the query parameter in the URL
     const setQuery = (newValue: string | null) => {
-        const updatedQuery = { ...router.query, parentMessageId: newValue || undefined };
-        router.push({ pathname: router.pathname, query: updatedQuery }, undefined, { shallow: true });
+        const params = new URLSearchParams(searchParams.toString());
+        if (newValue) {
+            params.set('parentMessageId', newValue);
+        } else {
+            params.delete('parentMessageId');
+        }
+        router.push(`?${params.toString()}`);
         setParentMessageId(newValue);
     };
 
-    return [parentMessageId, setQuery];
+    return [parentMessageId, setQuery] as const;
 };

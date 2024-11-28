@@ -4,28 +4,74 @@ import { useGetMemeber } from '../api/useGetMember'
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, ChevronDown, Loader2, MailIcon, XIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu,DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuTrigger, DropdownMenuRadioItem} from '@/components/ui/dropdown-menu';
+
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { useUpdateMember } from '../api/useUpdateMember';
 import { useRemoveMember } from '../api/useRemoveMember';
 import useCurrentMemeber from '../api/useCurrentMemeber';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import useConfirm from '@/hooks/useConfirm';
 interface ProfileProps {
   memberId: Id<"members">,
   onClose: () => void,
 }
 const Profile = ({ memberId, onClose }: ProfileProps) => {
+  // router
+  const router = useRouter();
+  const [LeaveDialog, ConfirmLeave] = useConfirm("leave workspace", "are you sure you want to leave this workspace");
+  const [RemoveDialog, ConfirmRemove] = useConfirm("remove member", "are you sure you want to remove this member ");
+  const [UpdateDialog, ConfirmUpdate] = useConfirm("update member", "are you sure you want to update this member role");
   const {workspaceId} = useParams();
   const {data: currentMember, isLoading: loadingCurrentMember} = useCurrentMemeber({workspaceId: workspaceId as Id<"workspaces">});
   const { data: member, isLoading: memberLoading } = useGetMemeber({ memberId });
   const {mutate: updateMember, isPending: updatingMember} = useUpdateMember();
   const {mutate: removeMember, isPending: removingMember} = useRemoveMember();
-  const onRemove = () => {
-    removeMember({id: memberId})
+  const onRemove = async () => {
+    const ok = await ConfirmRemove();
+    if (!ok) return;
+    removeMember({id: memberId}, {
+      onSuccess: () => {
+        toast.success("role changed");
+        router.replace('/')
+        onClose();
+      }, onError: () => {
+        toast.success("failed to change role");
+      }
+    })
+  }
+  const onLeave = async () => {
+    const ok = await ConfirmLeave();
+    if (!ok) return;
+    removeMember({id: memberId}, {
+      onSuccess: () => {
+        toast.success("you left the workspace");
+        router.replace('/')
+        onClose();
+      }, onError: () => {
+        toast.success("failed to leave the workspace");
+      }
+    })
+  }
+  const onRoleChanged = async (role: 'admin' | 'member') => {
+    const ok = await ConfirmUpdate();
+    if (!ok) return;
+
+    updateMember({id: memberId, role}, {
+      onSuccess: () => {
+        toast.success("you left the workspace");
+        onClose();
+      }, onError: () => {
+        toast.success("failed to leave the workspace");
+      }
+    })
   }
 
   if (memberLoading || loadingCurrentMember) {
     return (
+      
       <div className='flex flex-col h-full'>
         <div className='h-[49px] flex justify-between p-4 items-center border-b'>
           <p className='text-lg font-bold'>Profile</p>
@@ -63,6 +109,10 @@ const Profile = ({ memberId, onClose }: ProfileProps) => {
     </div>
   }
   return (
+  <>
+  <LeaveDialog />
+  <RemoveDialog />
+  <UpdateDialog />
     <div className='flex flex-col h-full'>
       <div className='h-[49px] flex justify-between p-4 items-center border-b'>
         <p className='text-lg font-bold'>Profile</p>
@@ -86,13 +136,13 @@ const Profile = ({ memberId, onClose }: ProfileProps) => {
             <Button variant={'outline'} className='w-full capitalize'>
               {member?.role} <ChevronDown className='size-4 ml-2' />
             </Button>
-            <Button variant={'outline'} className='w-full capitalize'>
+            <Button onClick={onRemove} variant={'outline'} className='w-full capitalize'>
               Remove
             </Button>
           </div>
 
         ): currentMember?.role !== 'admin' && currentMember?._id == memberId ? (
-          <Button variant={'outline'} className='w-full capitalize mt-4'>
+          <Button onClick={onLeave} variant={'outline'} className='w-full capitalize mt-4'>
               Leave
             </Button>
 
@@ -114,7 +164,7 @@ const Profile = ({ memberId, onClose }: ProfileProps) => {
         </div>
 
       </div>
-    </div>
+    </div></>
   )
 }
 
