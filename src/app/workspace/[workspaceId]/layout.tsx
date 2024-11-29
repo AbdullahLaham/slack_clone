@@ -37,7 +37,6 @@ const WorkspaceLayout = ({
               <ResizablePanel minSize={20} defaultSize={29} >
                 {parentMessageId ? (
                   <div>
-                    yyyyyyyyyyyyyyyyyyy
                     <Thread messageId={parentMessageId as Id<"messages">} onClose={onClose} />
                   </div>
 

@@ -199,7 +199,7 @@ const Thread = ({ messageId, onClose }: ThreadProps) => {
           </div>
         </div>
       )}
-        <Message hideThreadButton memberId={message?.memberId} authorImage={message?.user.image} isAuthor={currentMember?._id == message?.memberId}  body={message?.body} image={message?.image} createdAt={message?._creationTime} updatedAt={message?.updatedAt} id={message?._id} reactions={message?.reactions} isEditing={editingId == message?._id} setEditingId={setEditingId}  />
+        <Message hideThreadButton memberId={message?.memberId} authorImage={message?.user.image} isAuthor={currentMember?._id == message?.memberId}  body={message?.body!} image={message?.image} createdAt={message?._creationTime!} updatedAt={message?.updatedAt} id={message?._id!} reactions={message?.reactions} isEditing={editingId == message?._id} setEditingId={setEditingId}  />
         <Editor key={editorKey} innerRef={editorRef} onSubmit={handleSubmit} disabled={pending} placeholder='Reply...'  />
       </div>
       

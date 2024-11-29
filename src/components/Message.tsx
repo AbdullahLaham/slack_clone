@@ -37,10 +37,10 @@ interface MessageProps {
     setEditingId: (id: Id<'messages'> | null) => void;
     isCompact?: boolean;
     hideThreadButton?: boolean;
-    threadCount: number;
+    threadCount?: number;
     threadImage?: string;
     threadName?: string;
-    threadTimestamp: number
+    threadTimestamp?: number
 }
 const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, reactions, body, image, createdAt, updatedAt, isEditing, setEditingId, isCompact, hideThreadButton, threadCount, threadImage, threadName = "Member", threadTimestamp }: MessageProps) => {
     const {parentMessageId, onOpenMessage, profileId, onOpenProfile} = usePanel();
@@ -132,7 +132,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                                 <span className='text-xs text-muted-foreground'>(edited)</span>
                             ) : null}
                             <Reactions reactions={reactions} onChange={handleReaction} />
-                            <ThreadBar image={threadImage} count={threadCount} timestamp={threadTimestamp} name={threadName} onClick={() => onOpenMessage(id)}  />
+                            <ThreadBar image={threadImage} count={threadCount!} timestamp={threadTimestamp!} name={threadName} onClick={() => onOpenMessage(id)}  />
                         </div> : (
                             <div className='w-full h-full'>
                                 <Editor onSubmit={handleUpdateMessage} disabled={isPending} defaultValue={JSON.parse(body)} onCancel={() => setEditingId(null)} variant={'update'} />
@@ -185,7 +185,7 @@ const Message = ({ id, memberId, authorImage, authorName = "Member", isAuthor, r
                                 ) : null}
                                 
                                 <Reactions reactions={reactions} onChange={handleReaction} />
-                                <ThreadBar image={threadImage} count={threadCount} timestamp={threadTimestamp} name={threadName} onClick={() => onOpenMessage(id)} />
+                                <ThreadBar image={threadImage} count={threadCount!} timestamp={threadTimestamp!} name={threadName} onClick={() => onOpenMessage(id)} />
                             </div>
                         </> : (
                             <div className='w-full h-full'>

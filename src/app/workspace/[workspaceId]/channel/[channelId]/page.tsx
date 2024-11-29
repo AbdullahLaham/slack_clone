@@ -33,7 +33,7 @@ const ChannelIdPage = () => {
   return (
     <div className='flex flex-col h-full'>
       <Header title={channel?.name} />
-      <MessageList channelName={channel.name} channelCreationTime={channel._creationTime} data={results} loadMore={loadMore} isLoading={status == "LoadingMore"} canLoadMore={status == 'CanLoadMore'} />
+      <MessageList channelName={channel.name} channelCreationTime={channel._creationTime} data={results} loadMore={loadMore} isLoadingMore={status == "LoadingMore"} canLoadMore={status == 'CanLoadMore'} />
       <ChatInput placeholder={`Message # ${channel.name}`}  />
       
     </div>

@@ -1,7 +1,6 @@
 /* eslint disable @next/next/no-img-element */
 import React from 'react'
-import { Dialog, DialogContent } from './ui/dialog';
-import { DialogTrigger } from '@radix-ui/react-dialog';
+import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import Image from 'next/image';
 
 interface ThumbnailProps {
