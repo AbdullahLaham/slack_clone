@@ -63,3 +63,8 @@ const WorkspaceLayout = ({
 }
 
 export default WorkspaceLayout
+
+
+// npx convex deploy --cmd 'npm run build'
+
+// CONVEX_DEPLOY_KEY: prod:colorless-mockingbird-505|eyJ2MiI6IjM3OTljZjM2NjA2OTRkNGI5ZGQ2OTkxMWMzMDkxN2ZhIn0=

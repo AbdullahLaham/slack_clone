@@ -23,8 +23,8 @@ const Reactions = ({ reactions, onChange }: ReactionsProps) => {
     }
     return (
         <div className='flex items-center gap-1 my-1'>
-            {reactions?.map((reaction) => (
-                <>
+            {reactions?.map((reaction, i) => (
+                <div key={i}>
                    <Hint label={`${reaction.count} ${reaction.count == 1 ? "person" : "people"}`}>
                    <button onClick={() => onChange(reaction.value)} className={cn('h-6 px-2 rounded-full bg-slate-200/70 border border-transparent text-slate-800 items-center gap-x-1', reaction.memberIds.includes(currentMember._id) && "bg-blue-100/70 border-blue-500 text-blue-500")}>
                         {reaction.value}
@@ -32,7 +32,7 @@ const Reactions = ({ reactions, onChange }: ReactionsProps) => {
                     </button>
                    </Hint>
                     
-                </>
+                </div>
 
             ))}
             <EmojiPopover hint='Add reaction' onEmojiSelect={(emoji) => onChange(emoji)}>
